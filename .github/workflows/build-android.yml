@@ -1,0 +1,39 @@
+name: Build Android Native Library
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Target RN Dependency
+        run: |
+          npm install react-native@0.86.3
+
+      - name: Build Android NDK Library
+        run: |
+          cd packages/realm/android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Upload Native Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: realm-android-so
+          path: packages/realm/android/build/outputs/
